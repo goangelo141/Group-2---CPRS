@@ -194,7 +194,7 @@ void loadFromFile(struct Patient patients[], int *count) {
                   patients[*count].contact,
                   patients[*count].address.street,
                   patients[*count].address.city,
-                  patients[*count].diagnosis) == 😎 {
+                  patients[*count].diagnosis) == 8) {
         (*count)++;
     }
 
@@ -271,3 +271,4 @@ int main() {
 
     return 0;
 }
+
