@@ -2,22 +2,32 @@
 #include<stdlib.h>
 #include<string.h>
 
+// -----------------------------
+// STRUCT DEFINITIONS
+// -----------------------------
+
+// Address structure to store street and city
 struct Address {
     char street[50];
     char city[30];
 };
 
+// Patient structure to store patient details
 struct Patient {
-    int id;
-    char name[50];
-    int age;
-    char gender[10];
-    char contact[20];
-    struct Address address;
-    char diagnosis[100];
+    int id;                 // Unique patient ID
+    char name[50];          // Patient name
+    int age;                // Patient age
+    char gender[10];        // Gender
+    char contact[20];       // Contact number
+    struct Address address; // Nested struct for address
+    char diagnosis[100];    // Diagnosis details
 };
 
-// Generate unique ID (incremental)
+// -----------------------------
+// FUNCTION DEFINITIONS
+// -----------------------------
+
+// Generate unique ID by finding the max ID in the array and incrementing it
 int generateUniqueID(struct Patient patients[], int count) {
     int maxID = 0;
     for (int i = 0; i < count; i++) {
@@ -25,21 +35,23 @@ int generateUniqueID(struct Patient patients[], int count) {
             maxID = patients[i].id;
         }
     }
-    return maxID + 1;
+    return maxID + 1; // Next available ID
 }
 
+// Add a new patient record
 void addPatient(struct Patient patients[], int *count) {
     struct Patient p;
-    p.id = generateUniqueID(patients, *count);
+    p.id = generateUniqueID(patients, *count); // Assign unique ID
     printf("\nAssigned Patient ID: %d\n", p.id);
 
+    // Input patient details
     printf("Enter Name: ");
     fgets(p.name, sizeof(p.name), stdin);
-    p.name[strcspn(p.name, "\n")] = '\0';
+    p.name[strcspn(p.name, "\n")] = '\0'; // Remove newline
 
     printf("Enter Age: ");
     scanf("%d", &p.age);
-    getchar();
+    getchar(); // Clear buffer
 
     printf("Enter Gender: ");
     fgets(p.gender, sizeof(p.gender), stdin);
@@ -61,11 +73,13 @@ void addPatient(struct Patient patients[], int *count) {
     fgets(p.diagnosis, sizeof(p.diagnosis), stdin);
     p.diagnosis[strcspn(p.diagnosis, "\n")] = '\0';
 
+    // Save patient to array
     patients[*count] = p;
     (*count)++;
     printf("\nPatient Recorded Successfully!\n");
 }
 
+// Display all patient records in tabular format
 void displayAllPatients(struct Patient patients[], int count) {
     if (count == 0) {
         printf("\nNo patient records found.\n");
@@ -86,6 +100,7 @@ void displayAllPatients(struct Patient patients[], int count) {
     printf("-------------------------------------------------------------\n");
 }
 
+// Search patient by ID
 void searchPatientByID(struct Patient patients[], int count) {
     int id, found = 0;
     printf("Enter Patient ID to search: ");
@@ -93,6 +108,7 @@ void searchPatientByID(struct Patient patients[], int count) {
 
     for (int i = 0; i < count; i++) {
         if (patients[i].id == id) {
+            // Display full patient details
             printf("\nPatient Found:\n");
             printf("ID: %d\nName: %s\nAge: %d\nGender: %s\nContact: %s\nStreet: %s\nCity: %s\nDiagnosis: %s\n",
                    patients[i].id,
@@ -112,6 +128,7 @@ void searchPatientByID(struct Patient patients[], int count) {
     }
 }
 
+// Update patient information by ID
 void updatePatient(struct Patient patients[], int count) {
     int id, found = 0;
     printf("Enter Patient ID to update: ");
@@ -120,6 +137,7 @@ void updatePatient(struct Patient patients[], int count) {
 
     for (int i = 0; i < count; i++) {
         if (patients[i].id == id) {
+            // Input new details
             printf("Enter New Name: ");
             fgets(patients[i].name, sizeof(patients[i].name), stdin);
             patients[i].name[strcspn(patients[i].name, "\n")] = '\0';
@@ -158,6 +176,7 @@ void updatePatient(struct Patient patients[], int count) {
     }
 }
 
+// Delete patient record by ID
 void deletePatient(struct Patient patients[], int *count) {
     int id, found = 0;
     printf("Enter Patient ID to delete: ");
@@ -165,6 +184,7 @@ void deletePatient(struct Patient patients[], int *count) {
 
     for (int i = 0; i < *count; i++) {
         if (patients[i].id == id) {
+            // Shift records to overwrite deleted patient
             for (int j = i; j < *count - 1; j++) {
                 patients[j] = patients[j + 1];
             }
@@ -179,13 +199,15 @@ void deletePatient(struct Patient patients[], int *count) {
     }
 }
 
+// Load patient records from file
 void loadFromFile(struct Patient patients[], int *count) {
     FILE *fp = fopen("patients.txt", "r");
     if (fp == NULL) {
-        *count = 0;
+        *count = 0; // No file found, start fresh
         return;
     }
 
+    // Read patient records line by line
     while (fscanf(fp, "%d|%49[^|]|%d|%9[^|]|%19[^|]|%49[^|]|%29[^|]|%99[^\n]\n",
                   &patients[*count].id,
                   patients[*count].name,
@@ -201,6 +223,7 @@ void loadFromFile(struct Patient patients[], int *count) {
     fclose(fp);
 }
 
+// Save patient records to file
 void saveToFile(struct Patient patients[], int count) {
     FILE *fp = fopen("patients.txt", "w");
     if (fp == NULL) {
@@ -208,6 +231,7 @@ void saveToFile(struct Patient patients[], int count) {
         return;
     }
 
+    // Write each patient record in pipe-separated format
     for (int i = 0; i < count; i++) {
         fprintf(fp, "%d|%s|%d|%s|%s|%s|%s|%s\n",
                 patients[i].id,
@@ -223,15 +247,22 @@ void saveToFile(struct Patient patients[], int count) {
     fclose(fp);
 }
 
+// -----------------------------
+// MAIN FUNCTION
+// -----------------------------
 int main() {
-    struct Patient patients[100];
-    int count = 0;
-    int choice;
+    struct Patient patients[100]; // Array to store up to 100 patients
+    int count = 0;                // Current patient count
+    int choice;                   // Menu choice
 
+    // Load existing patient records from file (if any)
     loadFromFile(patients, &count);
 
+    // Menu-driven loop
     do {
-        printf("\n---------------------------------\nCLINIC PATIENT RECORD SYSTEM\n---------------------------------\n");
+        printf("\n---------------------------------\n");
+        printf("CLINIC PATIENT RECORD SYSTEM\n");
+        printf("---------------------------------\n");
         printf("1. Add New Patient Record\n");
         printf("2. Display All Patient Records\n");
         printf("3. Search Patient by ID\n");
@@ -241,34 +272,34 @@ int main() {
         printf("---------------------------------\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
-        getchar();
+        getchar(); // Clear input buffer
 
+        // Handle user choice
         switch (choice) {
             case 1:
-                addPatient(patients, &count);
+                addPatient(patients, &count); // Add new patient
                 break;
             case 2:
-                displayAllPatients(patients, count);
+                displayAllPatients(patients, count); // Show all patients
                 break;
             case 3:
-                searchPatientByID(patients, count);
+                searchPatientByID(patients, count); // Search by ID
                 break;
             case 4:
-                updatePatient(patients, count);
+                updatePatient(patients, count); // Update patient info
                 break;
             case 5:
-                deletePatient(patients, &count);
+                deletePatient(patients, &count); // Delete patient
                 break;
             case 6:
-                saveToFile(patients, count);
+                saveToFile(patients, count); // Save before exit
                 printf("PROGRAM CLOSED\n");
                 break;
             default:
-                printf("Invalid choice.\n");
+                printf("Invalid choice.\n"); // Handle wrong input
                 break;
         }
-    } while (choice != 6);
+    } while (choice != 6); // Loop until user chooses to exit
 
     return 0;
 }
-
